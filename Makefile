@@ -74,6 +74,11 @@ define run_tester
 	"$(TESTER_BIN)"
 endef
 
+git:
+	git add .
+	git commit -m "$(m)"
+	git push
+
 # Empty JSON uses every stage from the official tester definition.
 test: tester
 	$(call run_tester,)
