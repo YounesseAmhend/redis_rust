@@ -49,6 +49,10 @@ func (b *RedisExecutable) Run(args ...string) error {
 		b.logger.Infof("%s", log)
 	}
 
+	// your_program.sh compiles with cargo before exec. The default 10s
+	// process timeout kills a cold release build before the server can bind.
+	b.executable.TimeoutInMilliseconds = 120 * 1000
+
 	if err := b.executable.Start(b.args...); err != nil {
 		return err
 	}

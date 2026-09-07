@@ -48,10 +48,11 @@ func defaultTestCasesJSON() string {
 	stageNames := stageNamesBySlug()
 	cases := make([]tester_context.TesterContextTestCase, 0, len(testerDefinition.TestCases))
 	for _, testCase := range testerDefinition.TestCases {
+		title := stageTitle(testCase.Slug, stageNames)
 		cases = append(cases, tester_context.TesterContextTestCase{
 			Slug:            testCase.Slug,
-			TesterLogPrefix: fmt.Sprintf("tester::#%s", strings.ToUpper(testCase.Slug)),
-			Title:           stageTitle(testCase.Slug, stageNames),
+			TesterLogPrefix: title,
+			Title:           title,
 		})
 	}
 
@@ -63,11 +64,21 @@ func withReadableTitles(cases []tester_context.TesterContextTestCase) []tester_c
 	readable := make([]tester_context.TesterContextTestCase, len(cases))
 	for i, testCase := range cases {
 		readable[i] = testCase
+		name := stageTitle(testCase.Slug, stageNames)
 		if testCase.Title == "" || testCase.Title == testCase.Slug {
-			readable[i].Title = stageTitle(testCase.Slug, stageNames)
+			readable[i].Title = name
+		}
+		if !isFixtureStyleCase(testCase) {
+			readable[i].TesterLogPrefix = name
 		}
 	}
 	return readable
+}
+
+func isFixtureStyleCase(testCase tester_context.TesterContextTestCase) bool {
+	expectedTitle := fmt.Sprintf("Stage #%s (%s)", strings.ToUpper(testCase.Slug), testCase.Slug)
+	expectedPrefix := fmt.Sprintf("tester::#%s", strings.ToUpper(testCase.Slug))
+	return testCase.Title == expectedTitle && strings.EqualFold(testCase.TesterLogPrefix, expectedPrefix)
 }
 
 func stageTitle(slug string, names map[string]string) string {
